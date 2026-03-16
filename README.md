@@ -17,7 +17,8 @@ This demo demonstrates high-level autonomous driving decision making through:
 
 - Modular Python implementation
 - Mock Alpamayo R1 interface (easily swappable with real model)
-- OpenCV-based visualization with frame-by-frame playback
+- **New!** Interactive Streamlit Web Interface (`app.py`) for clear reasoning and UI playback.
+- OpenCV-based CLI visualization with frame-by-frame playback
 - JSON-structured decision outputs
 - Urban driving scenarios (intersections, pedestrians, traffic)
 
@@ -31,44 +32,75 @@ This demo demonstrates high-level autonomous driving decision making through:
 
 ## Usage
 
-### Prepare Data
+### Local Setup
 
-1. Download Waymo Open Dataset scenes
-2. Extract front camera video clips to MP4 format
-3. Place video files in the `data/` folder
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Set up PYTHONPATH:
+   ```bash
+   # Windows
+   $env:PYTHONPATH = "src"
+   # Linux/macOS
+   export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+   ```
 
-### Run Demo
+### Quick Start (Streamlit UI)
+
+The easiest way to experience the reasoning loop is our new interactive web app.
+
+1. Generate a quick synthetic sample video to test with immediately:
+   ```bash
+   python scripts/create_sample_video.py
+   ```
+2. Run the Streamlit interface:
+   ```bash
+   streamlit run app.py
+   ```
+
+### Command Line Interface
+
+If you prefer the classic OpenCV heads-up display:
 
 ```bash
-python main.py --video_path data/your_waymo_video.mp4 --fps 1
+python main.py --video_path data/sample_video.mp4 --fps 1
 ```
 
-Example with a sample video:
+### Docker Support
+
+Build and run using Docker:
+
 ```bash
-python main.py --video_path data/sample_urban_driving.mp4 --fps 2
+docker build -t alpamayo-demo .
+docker run -it alpamayo-demo
 ```
 
-Options:
-- `--video_path`: Path to Waymo video file (required)
-- `--fps`: Frames per second to sample (default: 1)
-- `--mock`: Use mock Alpamayo policy (default: True)
+## Project Structure
 
-### Controls
-
-- **Space**: Pause/Play
-- **N**: Next frame (when paused)
-- **P**: Previous frame (when paused)
-- **Q** or **ESC**: Quit
+```text
+├── src/
+│   └── alpamayo_demo/      # Core package
+│       ├── core/           # Logic and schemas
+│       ├── utils/          # Data loading and visualization
+│       └── pipeline.py     # Pipeline orchestration
+├── tests/                  # Unit and integration tests
+├── scripts/                # Utility scripts (e.g. create_sample_video.py)
+├── data/                   # Dataset folder (place sample_video.mp4 here)
+├── Dockerfile              # Containerization
+├── app.py                  # Streamlit Web UI
+└── main.py                 # CLI Entry point
+```
 
 ## Architecture
 
-### Files
+The project follows a modular design:
 
-- `main.py`: Entry point and pipeline orchestration
-- `data_loader.py`: Video loading and frame sampling
-- `alpamayo_policy.py`: Alpamayo R1 interface (mock implementation)
-- `decision_schema.py`: JSON schema validation
-- `visualize.py`: OpenCV-based UI and overlays
+- **`AlpamayoPolicy`**: The core decision-making interface.
+- **`DecisionSchema`**: Strict validation for model outputs.
+- **`DataLoader`**: Optimized frame sampling from high-frequency Waymo data.
+- **`Visualization`**: Real-time decision delivery HUD.
 
 ### Decision Format
 
@@ -118,10 +150,10 @@ Modify `data_loader.py` to load from:
 
 ### Enhanced UI
 
-Replace OpenCV with Streamlit for web-based interface:
+We have provided a base Streamlit UI in `app.py`. Feel free to extend it further with:
 - Timeline scrubbing
-- Decision history
-- Interactive playback
+- Full decision history exports
+- Interactive playback controls
 
 ## Dependencies
 
