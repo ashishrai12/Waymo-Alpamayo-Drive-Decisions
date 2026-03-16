@@ -77,20 +77,58 @@ docker build -t alpamayo-demo .
 docker run -it alpamayo-demo
 ```
 
-## Project Structure
+## Project Structure & Workflow
 
-```text
-├── src/
-│   └── alpamayo_demo/      # Core package
-│       ├── core/           # Logic and schemas
-│       ├── utils/          # Data loading and visualization
-│       └── pipeline.py     # Pipeline orchestration
-├── tests/                  # Unit and integration tests
-├── scripts/                # Utility scripts (e.g. create_sample_video.py)
-├── data/                   # Dataset folder (place sample_video.mp4 here)
-├── Dockerfile              # Containerization
-├── app.py                  # Streamlit Web UI
-└── main.py                 # CLI Entry point
+```mermaid
+graph TD
+    subgraph Entry Points
+        A["main.py (CLI)"]
+        B["app.py (Streamlit UI)"]
+    end
+
+    subgraph "src/alpamayo_demo"
+        subgraph core
+            C["policy.py — AlpamayoPolicy"]
+            D["schema.py — DecisionSchema"]
+        end
+        subgraph utils
+            E["data_loader.py — Frame Sampling"]
+            F["visualization.py — OpenCV HUD"]
+        end
+    end
+
+    subgraph "src/"
+        G["math_foundations.jl — Kinematic Models"]
+    end
+
+    subgraph Data
+        H["data/sample_video.mp4"]
+    end
+
+    subgraph Scripts
+        I["scripts/create_sample_video.py"]
+    end
+
+    subgraph CI
+        J[".github/workflows/ci.yml"]
+    end
+
+    subgraph Tests
+        K["tests/test_policy.py"]
+    end
+
+    I -->|generates| H
+    H -->|loaded by| E
+    E -->|frames| A
+    E -->|frames| B
+    A -->|calls| C
+    B -->|calls| C
+    C -->|validates via| D
+    C -->|decisions| F
+    C -->|decisions| B
+    J -->|runs| K
+    K -->|tests| C
+    G -.->|math reference| C
 ```
 
 ## Architecture
